@@ -175,7 +175,7 @@ The MCP hardening library maps directly to the **OWASP Practical Guide for Secur
 
 | Component | Tested versions |
 |---|---|
-| .NET | 10 |
+| .NET | 10.0 |
 | Microsoft Agent Framework | 1.0.0, 1.0.x |
 | MCP C# SDK | 1.0.0, 1.0.x |
 | Azure OpenAI | GPT-5.2, GPT-5.1, GPT-4o |
