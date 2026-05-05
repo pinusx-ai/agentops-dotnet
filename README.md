@@ -46,7 +46,7 @@ Three specialist agents (Researcher, Synthesizer, Reviewer) coordinated by a MAF
 
 Reference workload is a vertical-agnostic Q&A assistant over a synthetic public-domain corpus (Contoso). Replace the corpus, keep the architecture.
 
-*Architecture diagram coming with the first sample release.*
+![AgentOps.NET architecture: three specialist agents in a MAF graph workflow over a hardened MCP server, backed by Azure AI Search, pgvector, and Cosmos DB](docs/img/architecture.png)
 
 ---
 
