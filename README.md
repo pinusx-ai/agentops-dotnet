@@ -145,7 +145,7 @@ public class ResearcherAgentEvals : AgentEvaluationFixture<ResearcherAgent>
 
 Senior engineers read the ADRs before the README. We do too. ADRs land alongside each library:
 
-- ADR-001: Why three libraries instead of one framework
+- [ADR-001: Why three libraries instead of one framework](docs/decisions/ADR-001-three-libraries-not-one-framework.md)
 - ADR-002: Why OTel GenAI conventions over a custom schema
 - ADR-003: Why Langfuse alongside Application Insights
 - ADR-004: Why Entra ID is the only first-class auth path
