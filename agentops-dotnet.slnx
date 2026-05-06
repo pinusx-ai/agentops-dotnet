@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/01-maf-mcp-quickstart/" />
+  <Folder Name="/samples/01-maf-mcp-quickstart/agent/">
+    <Project Path="samples/01-maf-mcp-quickstart/agent/Agent.csproj" />
+  </Folder>
+  <Folder Name="/samples/01-maf-mcp-quickstart/mcp-server/">
+    <Project Path="samples/01-maf-mcp-quickstart/mcp-server/McpServer.csproj" />
+  </Folder>
+</Solution>

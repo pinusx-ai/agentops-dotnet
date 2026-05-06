@@ -50,33 +50,24 @@ Reference workload is a vertical-agnostic Q&A assistant over a synthetic public-
 
 ---
 
-## 5-minute quickstart
+## Try the quickstart
 
-> **Note:** Quickstart is being implemented. Watch this repo to get notified when the first release lands.
+A working end-to-end sample lives at [`samples/01-maf-mcp-quickstart/`](samples/01-maf-mcp-quickstart/) — one MAF agent, one MCP server, full OpenTelemetry GenAI tracing. Cloneable and runnable today.
 
-Prerequisites: .NET 10 SDK, Azure Developer CLI (`azd`), an Azure subscription with OpenAI access.
+Prerequisites: .NET 10 SDK, an OpenAI API key, an Aspire Dashboard reachable over OTLP gRPC.
 
 ```bash
-# Scaffold a new project from the template
-dotnet new install AgentOps.Templates
-dotnet new agentops -n MyAgent
-cd MyAgent
+git clone https://github.com/pinusx-ai/agentops-dotnet
+cd agentops-dotnet
 
-# Deploy everything
-azd up
+export OPENAI_API_KEY=sk-...
+dotnet build agentops-dotnet.slnx
 
-# Open the assistant
-azd show
+cd samples/01-maf-mcp-quickstart/agent
+dotnet run
 ```
 
-What you get on first run:
-- A working multi-agent assistant at `https://<your-app>.azurecontainerapps.io`
-- OpenTelemetry traces flowing to Application Insights *and* Langfuse
-- An MCP server already behind Entra ID, with audit logs in Cosmos
-- A passing eval gate in GitHub Actions
-- A blocking approval prompt the first time the agent tries a destructive tool
-
-Tear down with `azd down`.
+The numbered prefix telegraphs progression — `01-maf-mcp-quickstart` is the first; `02-multi-agent-graph`, `03-hardening-walkthrough`, and the comprehensive `contoso-knowledge-assistant` follow as libraries land. Full sample notes and known limitations: [`samples/01-maf-mcp-quickstart/README.md`](samples/01-maf-mcp-quickstart/README.md).
 
 ---
 
@@ -227,7 +218,10 @@ To keep scope honest:
 ```
 agentops-dotnet/
 ├── samples/
-│   └── contoso-knowledge-assistant/    # End-to-end reference workload
+│   ├── 01-maf-mcp-quickstart/          # Shipped — MAF + MCP + OTel quickstart
+│   ├── 02-multi-agent-graph/           # Planned
+│   ├── 03-hardening-walkthrough/       # Planned
+│   └── contoso-knowledge-assistant/    # Planned — end-to-end reference workload
 ├── src/
 │   ├── AgentOps.Observability/         # NuGet
 │   ├── AgentOps.Mcp.Hardening/         # NuGet
