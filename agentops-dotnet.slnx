@@ -7,4 +7,10 @@
   <Folder Name="/samples/01-maf-mcp-quickstart/mcp-server/">
     <Project Path="samples/01-maf-mcp-quickstart/mcp-server/McpServer.csproj" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AgentOps.Observability/AgentOps.Observability.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AgentOps.Observability.Tests/AgentOps.Observability.Tests.csproj" />
+  </Folder>
 </Solution>

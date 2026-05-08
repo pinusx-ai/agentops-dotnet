@@ -1,11 +1,9 @@
-﻿using AgentOps.Quickstart.Agent;
+﻿using AgentOps.Observability;
+using AgentOps.Quickstart.Agent;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using ModelContextProtocol.Client;
 using OpenAI;
-using OpenTelemetry;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
     ?? throw new InvalidOperationException("OPENAI_API_KEY not set");
@@ -29,19 +27,18 @@ foreach (var t in mcpTools)
 var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT")
     ?? "http://localhost:4317";
 
-using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("AgentOps.Quickstart.Agent"))
-    .AddSource("*Microsoft.Extensions.AI")
-    .AddSource("*Microsoft.Agents.AI")
-    .AddOtlpExporter(opt => opt.Endpoint = new Uri(otlpEndpoint))
-    .Build();
+using var tracerProvider = AgentOpsObservability.CreateTracerProvider(new()
+{
+    ServiceName = "AgentOps.Quickstart.Agent",
+    OtlpEndpoint = otlpEndpoint
+});
 
 IChatClient chatClient = new OpenAIClient(apiKey)
     .GetChatClient("gpt-4o-mini")
     .AsIChatClient()
     .AsBuilder()
     .UseFunctionInvocation()
-    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = true)
+    .UseAgentOpsObservability()
     .Build();
 
 AIAgent agent = new ChatClientAgent(

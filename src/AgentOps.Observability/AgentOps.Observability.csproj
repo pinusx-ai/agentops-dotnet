@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ===== Build settings ===== -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- CS1591 = "missing XML comment for publicly visible type" — re-enable per type as docs land -->
+  </PropertyGroup>
+
+  <!-- ===== NuGet package identity ===== -->
+  <PropertyGroup>
+    <PackageId>AgentOps.Observability</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Pinusx AI, LLC</Authors>
+    <Company>Pinusx AI, LLC</Company>
+    <Copyright>Copyright (c) 2026 Pinusx AI, LLC</Copyright>
+    <Title>AgentOps.Observability</Title>
+    <Description>OpenTelemetry GenAI observability for Microsoft Agent Framework and Model Context Protocol on .NET 10. Drop-in OTLP exporter wiring, ChatClient middleware, source registration with sane defaults. Part of AgentOps.NET.</Description>
+    <PackageTags>opentelemetry;otel;genai;mcp;modelcontextprotocol;agent;maf;microsoft-agent-framework;observability;tracing;dotnet;agentops</PackageTags>
+    <PackageProjectUrl>https://github.com/pinusx-ai/agentops-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pinusx-ai/agentops-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial alpha. Source registration, OTLP exporter wiring, ChatClientBuilder.UseAgentOpsObservability extension, endpoint reachability check at startup. See repository CHANGELOG for details.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <!-- ===== Reproducibility & debugging ===== -->
+  <PropertyGroup>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- ===== Package validation ===== -->
+  <PropertyGroup>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <!-- No PackageValidationBaselineVersion until 0.2.0-alpha — we validate against ourselves until then -->
+  </PropertyGroup>
+
+  <!-- ===== Files included in the package ===== -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- ===== Dependencies ===== -->
+  <ItemGroup>
+    <!-- Source generators / compile-time only -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+
+    <!-- Runtime dependencies — kept minimal for v0.1 -->
+    <PackageReference Include="Microsoft.Extensions.AI" Version="[10.5.0,11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.*" />
+    <PackageReference Include="OpenTelemetry" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+  </ItemGroup>
+
+</Project>
