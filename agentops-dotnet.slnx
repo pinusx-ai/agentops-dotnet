@@ -8,6 +8,7 @@
     <Project Path="samples/01-maf-mcp-quickstart/mcp-server/McpServer.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/AgentOps.Mcp.Hardening/AgentOps.Mcp.Hardening.csproj" />
     <Project Path="src/AgentOps.Observability/AgentOps.Observability.csproj" />
   </Folder>
   <Folder Name="/tests/">
