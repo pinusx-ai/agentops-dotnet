@@ -139,7 +139,7 @@ Sample walkthrough with screenshots: [`samples/02-mcp-hardening-quickstart/READM
 | 6 | Multi-agent reference workload — `samples/contoso-knowledge-assistant` | Planned |
 | 7 | `AgentOps.Templates` (`dotnet new agentops`) | Planned |
 
-Star the repo or follow [@hariprakashdb](https://linkedin.com/in/hariprakashdb) to track shipments.
+Star the repo or follow [@hariprakashdb](https://www.linkedin.com/in/hariprakash-db/) to track shipments.
 
 ---
 
