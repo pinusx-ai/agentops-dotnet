@@ -1,28 +1,39 @@
 # AgentOps.NET
 
-> The reference architecture and library suite for putting **Microsoft Agent Framework** + **Model Context Protocol** into production on Azure. Built for .NET 10. Opinionated. Boring on purpose.
+> Production architecture and library suite for putting **Microsoft Agent Framework** + **Model Context Protocol** into production on .NET. Built for .NET 10. Opinionated. Boring on purpose.
 
 [![NuGet AgentOps.Observability](https://img.shields.io/nuget/v/AgentOps.Observability)](https://www.nuget.org/packages/AgentOps.Observability)
 [![NuGet AgentOps.Mcp.Hardening](https://img.shields.io/nuget/v/AgentOps.Mcp.Hardening)](https://www.nuget.org/packages/AgentOps.Mcp.Hardening)
-[![NuGet AgentOps.Evaluation](https://img.shields.io/nuget/v/AgentOps.Evaluation)](https://www.nuget.org/packages/AgentOps.Evaluation)
-[![CI](https://github.com/pinusx-ai/agentops-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/pinusx-ai/agentops-dotnet/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> **Status:** Early development. Repo scaffolded. Libraries and reference workload coming. Star the repo to follow progress.
+> **Status:** Two libraries live on NuGet. Runnable end-to-end sample with full Aspire Dashboard trace evidence. Evaluation library and multi-agent reference workload on the roadmap.
 
 ---
 
-## What this is, and why it exists
+## What's shipped
 
-Microsoft Agent Framework hit **1.0 GA on April 3, 2026**. The MCP C# SDK hit **1.0 in March 2026**. Both are production-grade. The official samples deliberately stop at "hello-world agent" and "single-page travel planner."
+| Library | Version | What it does |
+|---|---|---|
+| [`AgentOps.Observability`](https://www.nuget.org/packages/AgentOps.Observability) | `0.1.0-alpha` | OTel GenAI tracing for MAF + MCP agents with one-line wiring |
+| [`AgentOps.Mcp.Hardening`](https://www.nuget.org/packages/AgentOps.Mcp.Hardening) | `0.1.0-alpha` | Runaway prevention: bounded tool calls, recursion depth, token budget |
+| `AgentOps.Evaluation` | _Stage 4_ | Golden-set evals for MAF agents in CI |
 
-Every team going from sample to production hits the same three potholes in the same week:
+Plus a runnable sample: [`samples/02-mcp-hardening-quickstart/`](samples/02-mcp-hardening-quickstart/) — three demos exercising all three middleware layers against real LLM, with 12 trace screenshots captured at [`docs/screenshots/`](docs/screenshots/).
 
-1. **Observability** — `.UseOpenTelemetry()` is one line. Wiring OTel GenAI conventions to Application Insights *and* Langfuse, with cost / latency / tool-call dashboards and PII redaction, is bespoke per team and not in the docs.
-2. **MCP server hardening** — the C# SDK supports OAuth, scopes, and DCR. Production-grade Entra ID + Managed Identity + Key Vault wiring, scope-to-tool authorization, audit logging, an approval gateway for destructive tools, and OWASP-aligned guardrails are left as exercises.
-3. **Agent evaluation in CI** — Azure AI Evaluation SDK exists. RAGAS exists. xUnit exists. A working pattern that runs golden-set evals on every PR, fails the build on regression, and tracks drift across MAF agents and workflows is not yet a public reference in C#.
+---
 
-This repo closes all three. Use the libraries independently or scaffold the whole stack with `dotnet new agentops`.
+## Why this exists
+
+Microsoft Agent Framework hit 1.0 GA in April 2026. The MCP C# SDK hit 1.0 in March 2026. Both are production-grade. The official samples deliberately stop at "hello-world agent" and "single-page travel planner."
+
+Every team going from sample to production hits the same potholes in the same week:
+
+1. **Observability that goes beyond `.UseOpenTelemetry()`** — wiring OTel GenAI conventions to your real telemetry backend with cost, latency, and tool-call visibility.
+2. **Runaway prevention** — unbounded tool-call loops, recursive sub-agent storms, and silent token-budget burns that turn a $5 chat into a $5,000 incident.
+3. **MCP server hardening (auth + audit)** — Entra ID + Managed Identity + scope-to-tool authorization, approval gateways for destructive tools, OWASP-aligned guardrails.
+4. **Agent evaluation in CI** — running golden-set evals on every PR, failing the build on regression, tracking drift across agents and workflows.
+
+This repo closes #1 and #2 today. #3 is planned as `AgentOps.Mcp.Auth`. #4 is `AgentOps.Evaluation` (Stage 4).
 
 ---
 
@@ -30,31 +41,74 @@ This repo closes all three. Use the libraries independently or scaffold the whol
 
 | Production concern | Official Microsoft sample | What's missing | What this repo provides |
 |---|---|---|---|
-| Tracing & observability | `.UseOpenTelemetry()` one-liner in MAF samples | Cost-per-trace, tool-call spans, agent-handoff spans, PII filters, Langfuse export, sampling presets | `AgentOps.Observability` NuGet + Application Insights + Langfuse dashboards |
-| MCP auth | `WithHttpTransport()` with OAuth scopes example | Entra ID validation middleware, scope-to-tool maps, signed tool descriptions, audit logging | `AgentOps.Mcp.Hardening` NuGet |
-| Destructive tool calls | "Add human-in-the-loop" mentioned in docs | Runnable approval gateway with web UI, OWASP-aligned defaults | `IApprovalGateway` + reference UI in `samples/` |
-| OWASP MCP threats | Linked from MS Learn | SSRF defaults, redirect-URI validation, state-parameter checks, tool-poisoning defenses | Built into `AgentOps.Mcp.Hardening` |
-| Agent evaluation in CI | Azure AI Evaluation SDK quickstart | xUnit fixtures, golden YAML test cases, PR-comment reporters, regression gates | `AgentOps.Evaluation` NuGet |
-| End-to-end reference workload | Travel-planner single-agent demo | Multi-agent graph, hybrid retrieval, Cosmos + pgvector + Azure AI Search, Entra-secured | `samples/contoso-knowledge-assistant` |
-| Infrastructure-as-code | Bicep snippets per service | Single `azd up` deploy of full stack | Bicep + `azure.yaml` |
+| Tracing & observability | `.UseOpenTelemetry()` one-liner | Production-ready OTLP wiring with cost / latency / tool-call visibility | `AgentOps.Observability` ✅ |
+| Runaway prevention | None in samples | Bounded tool calls, recursion depth, token budget with telemetry signals | `AgentOps.Mcp.Hardening` ✅ |
+| MCP server auth | `WithHttpTransport()` with OAuth scopes example | Entra ID validation, scope-to-tool maps, audit logging, approval gateway | `AgentOps.Mcp.Auth` (planned) |
+| Agent evaluation in CI | Azure AI Evaluation SDK quickstart | xUnit fixtures, golden YAML, PR-comment reporters, regression gates | `AgentOps.Evaluation` (planned) |
+| End-to-end reference workload | Single-agent travel planner | Multi-agent graph, hybrid retrieval, Entra-secured | `samples/contoso-knowledge-assistant` (planned) |
+| Infrastructure-as-code | Bicep snippets per service | Single `azd up` deploy of full stack | Bicep + `azure.yaml` (planned) |
 
 ---
 
-## Architecture
+## The two shipped libraries
 
-Three specialist agents (Researcher, Synthesizer, Reviewer) coordinated by a MAF graph workflow. Hybrid retrieval over Azure AI Search + pgvector, structured state in Cosmos DB. MCP server exposes four tools — one read-only, one write-with-approval, one long-running, one tool-with-sampling. All requests flow through Entra ID; secrets live in Key Vault; identity is Managed.
+### `AgentOps.Observability`
 
-Reference workload is a vertical-agnostic Q&A assistant over a synthetic public-domain corpus (Contoso). Replace the corpus, keep the architecture.
+OTel GenAI tracing for MAF + MCP agents. One-line wiring to OTLP. Forwards to any OTLP backend (Aspire Dashboard, Honeycomb, Datadog, OpenTelemetry Collector → Application Insights / Langfuse / etc).
 
-![AgentOps.NET architecture: three specialist agents in a MAF graph workflow over a hardened MCP server, backed by Azure AI Search, pgvector, and Cosmos DB](docs/img/architecture.png)
+```csharp
+using var tracerProvider = AgentOpsObservability.CreateTracerProvider(
+    new AgentOpsObservabilityOptions
+    {
+        ServiceName = "MyAgent",
+        OtlpEndpoint = "http://localhost:4317"
+    },
+    loggerFactory);
+```
+
+Or via DI:
+
+```csharp
+services.AddAgentOpsObservability(opts => opts.OtlpEndpoint = "...");
+```
+
+Captures all MAF + MEAI GenAI semantic conventions: model and version, prompt and completion tokens, tool-call spans, agent-handoff spans, MCP server and tool labels. Source registration covers the `Experimental.*` prefix variants emitted while OTel GenAI conventions remain in Development status.
+
+Deferred to v0.2: PII redaction filter, dedicated Application Insights exporter, Langfuse exporter, sampling configuration. v0.1-alpha uses standard OTLP — bring your own backend.
+
+### `AgentOps.Mcp.Hardening`
+
+Runaway prevention for MAF agents via three composing middleware layers.
+
+```csharp
+using var scope = AgentOpsMcpHardening.BeginScope(new AgentOpsMcpHardeningOptions
+{
+    MaxToolCalls = 50,
+    MaxRecursionDepth = 5,
+    MaxTokenBudget = 100_000,
+});
+
+var chatClient = baseChatClient
+    .AsBuilder()
+    .UseFunctionInvocation()
+    .UseAgentOpsMcpHardening(loggerFactory)  // chat-layer
+    .Build();
+
+var agent = new ChatClientAgent(chatClient, ...)
+    .AsBuilder()
+    .UseAgentOpsMcpHardening(loggerFactory)  // agent + function layers
+    .Build();
+```
+
+Every breach emits three signals: a typed exception, an OpenTelemetry span event (`agentops.runaway.{capability}` with `capability` / `limit` / `actual` attributes), and a structured `ILogger` warning. Composes with `AgentOps.Observability` so it all lands in one trace tree.
+
+See [ADR-003](docs/decisions/ADR-003-maf-middleware-asymmetry.md) for an architectural finding worth knowing: MAF's `FunctionInvokingChatClient` catches function- and agent-layer exceptions and converts them to LLM-visible tool errors, producing graceful degradation by default. Chat-layer exceptions propagate normally. The library emits identical telemetry from all three layers regardless.
+
+Runnable demo: [`samples/02-mcp-hardening-quickstart/`](samples/02-mcp-hardening-quickstart/).
 
 ---
 
 ## Try the quickstart
-
-A working end-to-end sample lives at [`samples/01-maf-mcp-quickstart/`](samples/01-maf-mcp-quickstart/) — one MAF agent, one MCP server, full OpenTelemetry GenAI tracing. Cloneable and runnable today.
-
-Prerequisites: .NET 10 SDK, an OpenAI API key, an Aspire Dashboard reachable over OTLP gRPC.
 
 ```bash
 git clone https://github.com/pinusx-ai/agentops-dotnet
@@ -63,141 +117,54 @@ cd agentops-dotnet
 export OPENAI_API_KEY=sk-...
 dotnet build agentops-dotnet.slnx
 
-cd samples/01-maf-mcp-quickstart/agent
-dotnet run
+# Start an OTLP gRPC receiver on port 4317 (e.g. Aspire Dashboard). Then:
+dotnet run --project samples/02-mcp-hardening-quickstart/agent
 ```
 
-The numbered prefix telegraphs progression — `01-maf-mcp-quickstart` is the first; `02-multi-agent-graph`, `03-hardening-walkthrough`, and the comprehensive `contoso-knowledge-assistant` follow as libraries land. Full sample notes and known limitations: [`samples/01-maf-mcp-quickstart/README.md`](samples/01-maf-mcp-quickstart/README.md).
+Three demos run sequentially, exercising all three middleware layers. Console output shows formatted exception banners; full traces appear in your OTLP backend with the `agentops.runaway.{capability}` events attached to the failing spans.
+
+Sample walkthrough with screenshots: [`samples/02-mcp-hardening-quickstart/README.md`](samples/02-mcp-hardening-quickstart/README.md).
 
 ---
 
-## The three libraries
+## Roadmap
 
-### `AgentOps.Observability`
+| Stage | What | Status |
+|---|---|---|
+| 1 | MAF + MCP + OTel spike — `samples/01` | ✅ Shipped |
+| 2 | `AgentOps.Observability` v0.1-alpha on NuGet | ✅ Shipped |
+| 3 | `AgentOps.Mcp.Hardening` v0.1-alpha on NuGet | ✅ Shipped |
+| 4 | `AgentOps.Evaluation` v0.1-alpha | Planned |
+| 5 | `AgentOps.Mcp.Auth` v0.1-alpha (Entra ID + scopes + audit + approval gateway) | Planned |
+| 6 | Multi-agent reference workload — `samples/contoso-knowledge-assistant` | Planned |
+| 7 | `AgentOps.Templates` (`dotnet new agentops`) | Planned |
 
-Drop-in OTel GenAI + Application Insights + Langfuse with sane defaults.
-
-```csharp
-builder.Services.AddAgentOpsObservability(options =>
-{
-    options.AppInsightsConnectionString = builder.Configuration["AppInsights:ConnectionString"];
-    options.LangfuseEndpoint = builder.Configuration["Langfuse:Endpoint"];
-    options.RedactPii = true;
-    options.SamplingRatio = 0.25;
-});
-```
-
-Captures: model + version, prompt + completion tokens, cost-per-trace, tool-call spans, agent-handoff spans, MCP server/tool labels, retrieval recall metrics. PII filter is regex-extensible.
-
-### `AgentOps.Mcp.Hardening`
-
-ASP.NET Core middleware for the MCP C# SDK. Adds the production layer Microsoft's sample doesn't.
-
-```csharp
-builder.Services
-    .AddMcpServer()
-    .WithHttpTransport()
-    .WithAgentOpsHardening(options =>
-    {
-        options.RequireEntraId(builder.Configuration["EntraId:Authority"]);
-        options.MapScopeToTool("tools.read",  "search_documents");
-        options.MapScopeToTool("tools.write", "create_ticket");
-        options.RequireApprovalFor("create_ticket", "delete_record");
-        options.EnableAuditLog<CosmosAuditLogger>();
-        options.UseOwaspDefaults();
-    });
-```
-
-Includes: Entra ID validation, scope-to-tool maps, signed tool descriptions, structured audit logs (Cosmos / SQL / file), `IApprovalGateway` interface with a reference web UI, OWASP-aligned defaults for SSRF, redirect-URI, state-parameter, and tool-poisoning defenses.
-
-### `AgentOps.Evaluation`
-
-xUnit fixtures + a small DSL that runs Azure AI Evaluation SDK + RAGAS metrics from golden YAML. Emits Markdown PR comments. Fails the build on regression.
-
-```csharp
-public class ResearcherAgentEvals : AgentEvaluationFixture<ResearcherAgent>
-{
-    [Theory]
-    [GoldenSet("evals/researcher.golden.yaml")]
-    public async Task Should_meet_quality_bar(EvalCase @case)
-    {
-        var result = await EvaluateAsync(@case);
-
-        Assert.True(result.Groundedness   >= 0.85);
-        Assert.True(result.Relevance      >= 0.80);
-        Assert.True(result.RagasFaithful  >= 0.75);
-    }
-}
-```
+Star the repo or follow [@hariprakashdb](https://linkedin.com/in/hariprakashdb) to track shipments.
 
 ---
 
-## Why these defaults
+## ADRs
 
-Senior engineers read the ADRs before the README. We do too. ADRs land alongside each library:
+Senior engineers read the ADRs before the README. We do too.
 
 - [ADR-001: Why three libraries instead of one framework](docs/decisions/ADR-001-three-libraries-not-one-framework.md)
-- ADR-002: Why OTel GenAI conventions over a custom schema
-- ADR-003: Why Langfuse alongside Application Insights
-- ADR-004: Why Entra ID is the only first-class auth path
-- ADR-005: Why the approval gateway is synchronous by default
-- ADR-006: Why xUnit, not a bespoke eval runner
-- ADR-007: Why hybrid retrieval (Azure AI Search + pgvector)
-- ADR-008: Why the GA-only API surface, with previews quarantined to `/labs`
+- [ADR-003: MAF middleware layer asymmetry and exception propagation](docs/decisions/ADR-003-maf-middleware-asymmetry.md)
+
+Planned: ADR-002 (OTel GenAI conventions over custom schema), ADR-004 (auth strategy when `AgentOps.Mcp.Auth` lands), ADR-005 (approval gateway design), ADR-006 (xUnit over bespoke eval runner), ADR-007 (hybrid retrieval over Azure AI Search + pgvector), ADR-008 (GA-only API surface with previews quarantined to `/labs`).
 
 ---
 
-## Threat model & OWASP mapping
-
-The MCP hardening library maps directly to the **OWASP Practical Guide for Secure MCP Server Development** and the **OWASP GenAI Top 10**.
-
-| OWASP concern | Default in this library |
-|---|---|
-| Tool poisoning / unsigned tool descriptions | Tool descriptions signed at registration; signature verified per call |
-| Confused-deputy / SSRF in tool execution | Outbound HTTP egress allowlist; URL validator |
-| Token theft via redirect-URI tampering | Strict redirect-URI registration; state parameter required |
-| Privilege escalation via scope drift | Scope-to-tool map enforced at middleware layer, not in tool code |
-| Audit gap on destructive ops | Audit log emitted before tool dispatch, with idempotency key |
-| Prompt injection via tool output | Tool outputs flagged with provenance metadata; agents see source labels |
-
----
-
-## Compatibility matrix
+## Compatibility
 
 | Component | Tested versions |
 |---|---|
 | .NET | 10.0 |
-| Microsoft Agent Framework | 1.0.0, 1.0.x |
-| MCP C# SDK | 1.0.0, 1.0.x |
-| Azure OpenAI | GPT-5.2, GPT-5.1, GPT-4o |
-| Azure AI Search | 2024-07-01-Preview and later GA |
-| Cosmos DB | NoSQL API, vector search (DiskANN) |
-| pgvector | 0.7.0+ |
-| Azure regions | eastus2, westus3, westeurope, swedencentral |
+| Microsoft.Agents.AI | 1.3.0 (1.x compatible) |
+| Microsoft.Extensions.AI | 10.5.0 (10.x compatible) |
+| ModelContextProtocol | 1.0.0 |
+| OpenAI / Azure OpenAI | gpt-4o-mini tested; gpt-4o, gpt-5.x compatible |
 
-GA-only on the public surface. Preview features quarantined in `/labs` and explicitly labelled.
-
----
-
-## Production checklist
-
-Copy this into your own project's PR template.
-
-- [ ] OTel exporter to Application Insights configured with cost-per-trace
-- [ ] Langfuse export enabled in non-prod for prompt/output review
-- [ ] PII redaction filters reviewed against your data classification
-- [ ] Sampling ratio set per environment (1.0 in dev, 0.1–0.25 in prod)
-- [ ] Entra ID authority and audience pinned per environment
-- [ ] Scope-to-tool map reviewed by security owner
-- [ ] Approval gateway wired for every destructive tool
-- [ ] Audit log destination tested for retention + query SLA
-- [ ] Golden-set evals exist for every agent and workflow
-- [ ] Regression thresholds set in CI; PR fails on regression
-- [ ] Threat model reviewed against OWASP GenAI Top 10
-- [ ] Managed Identity used end-to-end; zero secrets in app config
-- [ ] Key Vault references resolved at startup, not runtime
-- [ ] Cost ceiling alerting on Azure OpenAI and Azure AI Search
-- [ ] `azd down` rehearsed in non-prod
+GA-only on the public API surface. Preview features will quarantine to `/labs` when applicable.
 
 ---
 
@@ -205,11 +172,11 @@ Copy this into your own project's PR template.
 
 To keep scope honest:
 
-- **Not a vertical solution.** No healthcare, no claims, no aviation, no MRO, no parts management, no maintenance workflow, no defense or aerospace patterns. The Contoso reference workload is deliberately generic.
+- **Not a vertical solution.** No healthcare, claims, aviation, MRO, parts management, maintenance workflow, defense, or aerospace patterns. The planned Contoso reference workload is deliberately generic.
 - **Not a competitor to Microsoft Agent Framework.** It depends on MAF and tracks its public API surface. When MAF adds a feature this repo provides, the repo deprecates.
-- **Not a replacement for Azure AI Evaluation SDK or RAGAS.** It composes them.
+- **Not a replacement for Azure AI Evaluation SDK or RAGAS.** When `AgentOps.Evaluation` ships, it will compose them.
 - **Not a low-code platform.** No Copilot Studio, no Power Platform.
-- **Not opinionated about which LLM you use.** Bring your own. Defaults to Azure OpenAI; documented swap paths to Anthropic via Foundry, OpenAI direct, and OSS via Foundry Local.
+- **Not opinionated about which LLM you use.** Bring your own. Tested against Azure OpenAI; documented swap paths to Anthropic via Foundry, OpenAI direct, and OSS via Foundry Local will follow.
 
 ---
 
@@ -218,35 +185,24 @@ To keep scope honest:
 ```
 agentops-dotnet/
 ├── samples/
-│   ├── 01-maf-mcp-quickstart/          # Shipped — MAF + MCP + OTel quickstart
-│   ├── 02-multi-agent-graph/           # Planned
-│   ├── 03-hardening-walkthrough/       # Planned
-│   └── contoso-knowledge-assistant/    # Planned — end-to-end reference workload
+│   ├── 01-maf-mcp-quickstart/         ✅ Shipped — MAF + MCP + OTel quickstart
+│   └── 02-mcp-hardening-quickstart/   ✅ Shipped — three demos, all middleware layers
 ├── src/
-│   ├── AgentOps.Observability/         # NuGet
-│   ├── AgentOps.Mcp.Hardening/         # NuGet
-│   ├── AgentOps.Evaluation/            # NuGet
-│   └── AgentOps.Templates/             # `dotnet new agentops`
-├── labs/                               # Preview-feature samples (not GA-stable)
-├── docs/
-│   ├── decisions/                      # ADRs
-│   ├── threat-model.md
-│   ├── evaluation.md
-│   └── img/
-├── infra/                              # Bicep + azure.yaml
+│   ├── AgentOps.Observability/         ✅ On NuGet
+│   └── AgentOps.Mcp.Hardening/         ✅ On NuGet
 ├── tests/
-│   ├── AgentOps.Observability.Tests/
-│   ├── AgentOps.Mcp.Hardening.Tests/
-│   └── AgentOps.Evaluation.Tests/
-└── .github/
-    └── workflows/
+│   └── AgentOps.Observability.Tests/  ✅
+├── docs/
+│   ├── decisions/                      ADRs
+│   └── screenshots/                    Trace evidence from sample runs
+└── agentops-dotnet.slnx                Solution file
 ```
 
 ---
 
 ## Contributing
 
-Issues and PRs welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) — short, no surprises.
+Issues and PRs welcome. The project is in active development; APIs may shift before 1.0.
 
 This project follows the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 
